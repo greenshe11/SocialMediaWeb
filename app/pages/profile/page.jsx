@@ -7,10 +7,37 @@ import { ChakraProvider } from '@chakra-ui/react'
 import FileUpload from "@/components/fileUpload";
 import { signOut, useSession } from "next-auth/react"
 import PostCard from "@/components/postCard";
+import { useEffect, useState } from "react";
+import { getPostsFromDb } from "@/utils/postsControl";
+import { getMediaFromDb, getMediaFromDbUsingPost } from "@/utils/mediaControl";
+import { getAccountInfo } from "@/utils/accountControl";
 
 export default function Home() {
   const sessionObj = useSession();
   const colorTheme = "#2E2F37";
+  const [posts, setPosts] = useState();
+
+  useEffect(()=>{
+    const fetchInfo = async () => {
+      const posts_jsx = []
+      const account = await getAccountInfo(sessionObj.data?.id)
+      const allPosts = await getPostsFromDb(sessionObj.data?.id)
+      for (let i=0 ; i<allPosts.length; i++){
+        let postMediaData = await getMediaFromDbUsingPost(allPosts[i]._id)
+        posts_jsx.push(<PostCard account={account} postData={allPosts[i]} postMediaData={postMediaData}/>)
+      }
+      setPosts(posts_jsx.reverse())
+
+        
+    }
+
+    if (sessionObj.status == "authenticated") {
+        console.log("AUTHENITICATED!")
+        fetchInfo()
+
+    }
+}, [sessionObj.status]);
+
   return (
   <ChakraProvider>
   <Flex>
@@ -27,10 +54,7 @@ export default function Home() {
             w={{base:"90%", md:"50%"}}
             >
                 <CardBody textAlign="center">
-                  <PostCard/>
-                  <PostCard/>
-                  <PostCard/><PostCard/><PostCard/><PostCard/><PostCard/><PostCard/><PostCard/>
-                  <PostCard/>
+                  {posts}
                 </CardBody>
         </Card>
        </VStack>

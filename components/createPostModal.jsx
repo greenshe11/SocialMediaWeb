@@ -1,6 +1,7 @@
 "use client";
 
 import { createLocalFileUrl } from '@/utils/mediaControl';
+import { postPostToDb } from '@/utils/postsControl';
 import { VStack, FormControl, Modal, ModalHeader, ModalCloseButton, ModalBody, Text, ModalFooter, Button, ModalOverlay, ModalContent, Textarea, Input, Image } from '@chakra-ui/react';
 import { useEffect, useRef, useState } from "react";
 
@@ -9,6 +10,7 @@ export default function CreatePostModal({ account, isOpen, onClose }) {
     const finalRef = useRef(null);
     const [fileUrl, setFileUrl] = useState();
     const [file, setFile] = useState();
+    const [description, setDescription] = useState();
 
      // CALLBACKS
      const onFileChange = (e) => {
@@ -16,6 +18,12 @@ export default function CreatePostModal({ account, isOpen, onClose }) {
       setFileUrl(url)
     
       setFile(file)
+    }
+
+    const onSubmit = async (e) => {
+        console.log(description)
+        const postId = await postPostToDb(account._id, description, file)
+        onClose(e)
     }
 
     return (
@@ -33,7 +41,7 @@ export default function CreatePostModal({ account, isOpen, onClose }) {
                     <VStack spacing="20px">
                         <form style={{width: '100%'}}>
                           <FormControl>
-                              <Textarea placeholder='Say something...' />
+                              <Textarea onChange={(e)=>{setDescription(e.target.value)}} placeholder='Say something...' />
                               <VStack m="10px" borderWidth="1px" borderColor="#E2E8F0">
                                 <Image maxHeight="400px" objectFit='contain' width="100%" src={fileUrl}/>
                               </VStack>
@@ -46,7 +54,7 @@ export default function CreatePostModal({ account, isOpen, onClose }) {
                 </ModalBody>
 
                 <ModalFooter>
-                    <Button type="submit" colorScheme='blue' mr={3}>
+                    <Button onClick={(e) => {onSubmit(e)}} type="submit" colorScheme='blue' mr={3}>
                         Save
                     </Button>
                     <Button onClick={onClose}>Cancel</Button>

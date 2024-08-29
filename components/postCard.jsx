@@ -17,8 +17,8 @@ import InfoEditModal from './infoEditModal';
 import { getAccountInfo } from '@/utils/accountControl';
 import { createUrlForMedia, getMediaFromDb } from '@/utils/mediaControl';
 
-export default function PostCard({sessionObj, colorTheme}){
-    const [postMedias, setPostMedias] = useState();
+export default function PostCard({account, postData, postMediaData}){
+    
     const [loveLabel, setLoveLabel] = useState();
     const [laughLabel, setLaughLabel] = useState();
     const [sadLabel, setSadLabel] = useState();
@@ -27,49 +27,78 @@ export default function PostCard({sessionObj, colorTheme}){
     const [laughColor, setLaughColor] = useState('');
     const [sadColor, setSadColor] = useState('');
     const [angryColor, setAngryColor] = useState('');
+
+    const [profileImgUrl, setProfileImgUrl] = useState();
+    const [username, setUsername] = useState();
+    const [description, setDescription] = useState();
+    const [datetime, setDatetime] = useState();
+    const [media, setMedia] = useState();
+
+    const showMedia = () => {
+        if (!postMediaData) {return}
+        const mediaUrl = createUrlForMedia(postMediaData)
+        if (postMediaData?.media?.mediaType == 'image'){
+            return <Image width="100%" maxHeight="400px" objectFit="contain" src={mediaUrl}></Image>
+        }
+    }
+
+    useEffect(()=>{
+        const getProfileImage = async () => {
+            const media = await getMediaFromDb(account.account.profileImg)
+            setProfileImgUrl(createUrlForMedia(media))
+        }
+        getProfileImage()
+        console.log("ACCOUNT",account)
+        setUsername(account.account.username)
+        setDescription(postData.description)
+        setDatetime(postData.createdAt)
+        setMedia(showMedia())
+    },[])
+
     const resetColor = () =>{
         setLoveColor('')
         setLaughColor('')
         setSadColor('')
         setAngryColor('')
     }
+   
     const makeReaction = (e, reaction) => {
-        console.log(reaction)
         const color_code = {love: "#faa2ee", laugh: "#eeff59", sad: "#a2b1fa",  angry: "#ff5959"}
         if (reaction == 'love'){
             resetColor()
-            setLoveColor(color_code.love)
+            loveColor!=color_code.love ? setLoveColor(color_code.love): null
         }
         else if (reaction =='laugh')     {
             resetColor()
-            setLaughColor(color_code.laugh)
+            laughColor!=color_code.laugh ? setLaughColor(color_code.laugh): null
         }else if (reaction =='sad') {
             resetColor()
-            setSadColor(color_code.sad)
+            sadColor!=color_code.sad ? setSadColor(color_code.sad) : null
         }else if (reaction == 'angry'){
             resetColor()
-            setAngryColor(color_code.angry)
+            angryColor!=color_code.angry ? setAngryColor(color_code.angry) : null
         }
         
     }
+
     // ---------------------------------
     return (
         <VStack borderBottomWidth="2px" borderBottomColor="#E2E8F0" my="5px" py="5px" align='start'>
             
             {/*post Header */}
             <HStack>
-                <Image width="50px" height="50px" objectFit="cover" mx="10px" borderWidth="5px" borderStyle="solid" borderRadius="50%" src="/p-default.png"></Image>
+                <Image width="50px" height="50px" objectFit="cover" mx="10px" borderWidth="5px" borderStyle="solid" borderRadius="50%" src={profileImgUrl ? profileImgUrl : "/p-default.png"}></Image>
                 <VStack align='start' spacing="0px">
-                    <Text fontSize="15px" fontWeight="bold">Username</Text>
-                    <Text fontSize="10px" fontColor="secondary">11/21/2000 25:00</Text>
+                    <Text fontSize="15px" fontWeight="bold">{username}</Text>
+                    <Text fontSize="10px" fontColor="secondary">{datetime}</Text>
                 </VStack>
             </HStack>
 
             {/*post Body */}
             <VStack width="100%" align="start">
-                <Text>Helo World</Text>
+                <Text>{description}</Text>
                 <HStack width="100%" align="center" justifyContent="center" borderWidth="1px" borderColor="#E2E8F0" >
-                    <Image width="100%" maxHeight="400px" objectFit="contain" src="https://picsum.photos/200/300"></Image>
+                    {media}
                 </HStack>
             </VStack>
 

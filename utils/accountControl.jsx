@@ -1,7 +1,5 @@
 export const getAccountInfo = async (sessionId) => {
     try {
-        console.log("GETTING ACCOUNT INFO")
-        console.log(sessionId);
         const response = await fetch(`/api/accounts/${sessionId}`); // Replace with your API route
         if (!response.ok) {
           throw new Error('Network response was not ok');
@@ -18,8 +16,6 @@ export const getAccountInfo = async (sessionId) => {
 }
 
 export async function editAccount(accountId, username, address, birthdate, profileImg) {
-    console.log("HELLO")
-    console.log(profileImg)
     try{
       //profileIMg -> mediaId
         const res = await fetch(`/api/accounts/${accountId}`, {
@@ -27,7 +23,6 @@ export async function editAccount(accountId, username, address, birthdate, profi
             body: JSON.stringify({username, address, birthdate, profileImg})
         })
         if (!res.ok) {throw new Error(await res.text())}
-        console.log("HELLO DONE")
 
     }catch(e){
 console.error(e )};

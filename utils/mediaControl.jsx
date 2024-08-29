@@ -28,7 +28,10 @@ export const createLocalFileUrl = (event) => {
  * @returns Id of image from database
  */
 export const postMediaToDb = async (file, postId, mediaType) => {
-    console.log(file)
+    console.log("POSTING MEDIA TO DB")
+    console.log("file:", file)
+    console.log("postId:", postId)
+    console.log("mediaType:", mediaType)
     if (!file) {return}
     try{
         const data = new FormData();
@@ -42,8 +45,6 @@ export const postMediaToDb = async (file, postId, mediaType) => {
 
         if (!res.ok) {throw new Error(await res.text())}
         const dataJson = await res.json();
-        console.log(dataJson)
-        console.log(dataJson._id)
         return dataJson._id;
     }catch(e){
 console.error(e )}
@@ -88,6 +89,7 @@ export async function getMediaFromDb(mediaId) {
         // Assuming the media data is binary, convert it to an array buffer first
         
         // Parse the JSON response
+        
         const data = await response.json();
         
         return data
@@ -96,6 +98,26 @@ export async function getMediaFromDb(mediaId) {
         console.log(error);
         }
     }
+
+export async function getMediaFromDbUsingPost(postId) {
+    try {
+        const response = await fetch(`/api/media/getByPost/${postId}`); // Replace with your API route
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        // Assuming the media data is binary, convert it to an array buffer first
+        
+        // Parse the JSON response
+        
+        const data = await response.json();
+        
+        return data
+        
+        } catch (error) {
+        console.log(error);
+        }
+    }
+    
 
 /**
  * 
@@ -106,7 +128,6 @@ export async function getMediaFromDb(mediaId) {
 export function createUrlForMedia(mediaJson, mimeType = 'image/jpeg'){
     try {
         const mediaData = mediaJson?.media?.mediaData?.data;
-
         if (!mediaData) {
             throw new Error("Media data is undefined");
         }
