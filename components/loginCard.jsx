@@ -24,7 +24,7 @@ export default function LoginCard({colorTheme}){
         email, password, redirect: false
         });
         if (res.error){
-         alert("Incorrect Credentials!")
+         alert(`Incorrect Credentials! ${res.error}`)
         }
         router.replace('pages/profile')
     }

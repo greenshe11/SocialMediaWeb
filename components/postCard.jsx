@@ -16,9 +16,10 @@ import InfoEditModal from './infoEditModal';
 // utils
 import { getAccountInfo } from '@/utils/accountControl';
 import { createUrlForMedia, getMediaFromDb } from '@/utils/mediaControl';
+import { createReaction, updateReaction, deleteReaction, getReactionsFromPost, getUserReactionFromPost } from '@/utils/reactionControl';
 
 export default function PostCard({account, postData, postMediaData}){
-    
+    const [posterAccount, setPosterAccount] = useState();
     const [loveLabel, setLoveLabel] = useState();
     const [laughLabel, setLaughLabel] = useState();
     const [sadLabel, setSadLabel] = useState();
@@ -27,12 +28,18 @@ export default function PostCard({account, postData, postMediaData}){
     const [laughColor, setLaughColor] = useState('');
     const [sadColor, setSadColor] = useState('');
     const [angryColor, setAngryColor] = useState('');
+    const [loveCount, setLoveCount] = useState(0);
+    const [laughCount, setLaughCount] = useState(0);
+    const [angryCount, setAngryCount] = useState(0);
+    const [sadCount, setSadCount] = useState(0);
 
     const [profileImgUrl, setProfileImgUrl] = useState();
     const [username, setUsername] = useState();
     const [description, setDescription] = useState();
     const [datetime, setDatetime] = useState();
     const [media, setMedia] = useState();
+
+    const color_code = {love: "#faa2ee", laugh: "#eeff59", sad: "#a2b1fa",  angry: "#ff5959"}
 
     const showMedia = () => {
         if (!postMediaData) {return}
@@ -42,18 +49,54 @@ export default function PostCard({account, postData, postMediaData}){
         }
     }
 
-    useEffect(()=>{
-        const getProfileImage = async () => {
-            const media = await getMediaFromDb(account.account.profileImg)
-            setProfileImgUrl(createUrlForMedia(media))
+    const showReactionsColors = (reaction) => {
+        
+        if (reaction == "laugh") {
+            setLaughColor(color_code.laugh)
         }
-        getProfileImage()
-        console.log("ACCOUNT",account)
-        setUsername(account.account.username)
-        setDescription(postData.description)
-        setDatetime(postData.createdAt)
-        setMedia(showMedia())
-    },[])
+        else if (reaction == "love") {
+            setLoveColor(color_code.love)
+        }
+        else if (reaction == "sad") {
+            setSadColor(color_code.sad)
+        }
+        else if (reaction == "angry") {
+            setAngryColor(color_code.angry)
+        }
+       
+    }
+
+    const showReactions = async () => {
+        
+        const reactionData = await getReactionsFromPost(postData._id)
+        let tempLoveCount = 0;
+        let tempLaughCount = 0;
+        let tempAngryCount = 0;
+        let tempSadCount = 0;
+        console.log(reactionData)
+        for (let i=0; i<reactionData.content.length; i++){
+            if (reactionData.content[i].reaction == "love"){
+                tempLoveCount += 1;
+            }else if( reactionData.content[i].reaction == "sad"){
+                tempSadCount += 1;
+            }else if( reactionData.content[i].reaction == "angry"){
+                tempAngryCount += 1;
+            }else if( reactionData.content[i].reaction == "laugh"){
+                tempLaughCount += 1;
+            }
+            if (reactionData.content[i].reactorId==account.account._id){
+                resetColor()
+                showReactionsColors( reactionData.content[i].reaction)
+            }
+        }
+        setLoveCount(tempLoveCount)
+        setSadCount(tempSadCount)
+        setLaughCount(tempLaughCount)
+        setAngryCount(tempAngryCount)
+        
+
+        
+    }
 
     const resetColor = () =>{
         setLoveColor('')
@@ -61,25 +104,52 @@ export default function PostCard({account, postData, postMediaData}){
         setSadColor('')
         setAngryColor('')
     }
-   
-    const makeReaction = (e, reaction) => {
-        const color_code = {love: "#faa2ee", laugh: "#eeff59", sad: "#a2b1fa",  angry: "#ff5959"}
-        if (reaction == 'love'){
+
+    const getPosterAccount = async () => {
+        const resPosterAccount = await getAccountInfo(postData.userId)
+        setPosterAccount(resPosterAccount.account)
+        return resPosterAccount.account
+    }
+
+    const getProfileImage = async (resPosterAccount) => {
+        const media = await getMediaFromDb(resPosterAccount.profileImg)
+        setProfileImgUrl(createUrlForMedia(media))
+    }
+    const getInitialData = async() => {
+        const resPosterAccount = await getPosterAccount()
+        console.log("POSTERACCOUNT", resPosterAccount)
+        getProfileImage(resPosterAccount)
+        setUsername(resPosterAccount.username)
+        setDescription(postData.description)
+        setDatetime(postData.createdAt)
+        setMedia(showMedia())
+        showReactions()
+    }
+
+    const makeReaction = async (e, reaction) => {
+        const currentReaction = await getUserReactionFromPost(postData._id, account.account._id)
+        console.log(currentReaction)
+        if (!currentReaction.content){
+            console.log('creating reaction')
+            await createReaction(postData._id, account.account._id, posterAccount._id, reaction)
+        }else if (currentReaction.content.reaction == reaction) {
+            console.log('deleting reaction')
+            await deleteReaction(postData._id, account.account._id)
             resetColor()
-            loveColor!=color_code.love ? setLoveColor(color_code.love): null
         }
-        else if (reaction =='laugh')     {
-            resetColor()
-            laughColor!=color_code.laugh ? setLaughColor(color_code.laugh): null
-        }else if (reaction =='sad') {
-            resetColor()
-            sadColor!=color_code.sad ? setSadColor(color_code.sad) : null
-        }else if (reaction == 'angry'){
-            resetColor()
-            angryColor!=color_code.angry ? setAngryColor(color_code.angry) : null
+        else{
+            console.log('updating reaction')
+            await updateReaction(postData._id, account.account._id, reaction)
         }
+        showReactions()
         
     }
+
+    // -----------------------------------
+    
+    useEffect(()=>{
+        getInitialData()
+    },[])
 
     // ---------------------------------
     return (
@@ -113,7 +183,7 @@ export default function PostCard({account, postData, postMediaData}){
                     _hover = {{backgroundColor: loveColor}}
                     onMouseEnter={()=>{setLoveLabel("Love: ")}}
                     onMouseLeave={()=>{setLoveLabel("")}}>
-                    <Text fontSize="10px">{loveLabel}21</Text>
+                    <Text fontSize="10px">{loveLabel}{loveCount}</Text>
                 </Button>
                 <Button
                     aria-label="Laugh"
@@ -124,7 +194,7 @@ export default function PostCard({account, postData, postMediaData}){
                     onClick={(e) => {makeReaction(e, 'laugh')}}
                     onMouseEnter={()=>{setLaughLabel("Laugh: ")}}
                     onMouseLeave={()=>{setLaughLabel("")}}>
-                    <Text fontSize="10px">{laughLabel}5</Text>
+                    <Text fontSize="10px">{laughLabel}{laughCount}</Text>
                 </Button>
                 <Button
                     aria-label="Sad"
@@ -135,7 +205,7 @@ export default function PostCard({account, postData, postMediaData}){
                     onClick={(e) => {makeReaction(e, 'sad')}}
                     onMouseEnter={()=>{setSadLabel("Sad: ")}}
                     onMouseLeave={()=>{setSadLabel("")}}>
-                    <Text fontSize="10px">{sadLabel}5</Text>
+                    <Text fontSize="10px">{sadLabel}{sadCount}</Text>
                 </Button>
                 <Button
                     aria-label="Angry"
@@ -146,7 +216,7 @@ export default function PostCard({account, postData, postMediaData}){
                     onClick={(e) => {makeReaction(e, 'angry')}}
                     onMouseEnter={()=>{setAngryLabel("Angry: ")}}
                     onMouseLeave={()=>{setAngryLabel("")}}>
-                    <Text fontSize="10px">{angryLabel}5</Text>
+                    <Text fontSize="10px">{angryLabel}{angryCount}</Text>
                 </Button>
               
               
