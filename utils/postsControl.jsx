@@ -1,6 +1,6 @@
 import { postMediaToDb } from "./mediaControl"
 
-export const postPostToDb = async (userId, description, file) => {
+export const postPostToDb = async (userId, description, file, fileType) => {
   try{
       const data = {userId, description}
       const res = await fetch('http://localhost:3000/api/posts', {
@@ -12,7 +12,7 @@ export const postPostToDb = async (userId, description, file) => {
       const dataJson = await res.json()
       const postId = dataJson.content._id
       
-      postMediaToDb(file, postId, "image")
+      postMediaToDb(file, postId, fileType, fileType)
       
       
       return dataJson._id;

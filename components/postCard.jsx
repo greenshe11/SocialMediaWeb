@@ -42,12 +42,36 @@ export default function PostCard({account, postData, postMediaData}){
     const color_code = {love: "#faa2ee", laugh: "#eeff59", sad: "#a2b1fa",  angry: "#ff5959"}
 
     const showMedia = () => {
-        if (!postMediaData) {return}
-        const mediaUrl = createUrlForMedia(postMediaData)
-        if (postMediaData?.media?.mediaType == 'image'){
-            return <Image width="100%" maxHeight="400px" objectFit="contain" src={mediaUrl}></Image>
+        if (!postMediaData) {
+            return null;
         }
-    }
+    
+        const mediaUrl = createUrlForMedia(postMediaData);
+    
+        // Check the media type using MIME type
+        let mediaType = postMediaData?.media?.mediaType;
+    
+        if (mediaType.startsWith('image')) {
+            return <Image width="100%" maxHeight="400px" objectFit="contain" src={mediaUrl} />;
+        } else if (mediaType.startsWith('video')) {
+            return (
+                <video width="100%" maxHeight="400px" controls autoPlay>
+                    <source src={mediaUrl} type={mediaType} />
+                    Your browser does not support the video tag.
+                </video>
+            );
+        } else if (mediaType.startsWith('audio/')) {
+            return (
+                <audio controls>
+                    <source src={mediaUrl} type={mediaType} />
+                    Your browser does not support the audio element.
+                </audio>
+            );
+        } else {
+            return <Text>Unsupported media type</Text>;
+        }
+    };
+    
 
     const showReactionsColors = (reaction) => {
         

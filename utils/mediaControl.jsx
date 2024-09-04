@@ -125,13 +125,14 @@ export async function getMediaFromDbUsingPost(postId) {
  * @param {string} mimeType 
  * @returns url string
  */
-export function createUrlForMedia(mediaJson, mimeType = 'image/jpeg'){
+export function createUrlForMedia(mediaJson){
     try {
         const mediaData = mediaJson?.media?.mediaData?.data;
+        let mimeType = mediaJson?.media?.mediaType
         if (!mediaData) {
             throw new Error("Media data is undefined");
         }
-
+        
         const buffer = Buffer.from(mediaData, "base64");
         const base64String = buffer.toString("base64");
         const mediaUrl = `data:${mimeType};base64,${base64String}`;

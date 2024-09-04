@@ -11,18 +11,46 @@ export default function CreatePostModal({ account, isOpen, onClose }) {
     const [fileUrl, setFileUrl] = useState();
     const [file, setFile] = useState();
     const [description, setDescription] = useState();
+    const [fileType, setFileType] = useState();
+    const [media, setMedia] = useState();
 
      // CALLBACKS
      const onFileChange = (e) => {
       const {file, url} = createLocalFileUrl(e)
       setFileUrl(url)
-    
+      const resFileType = getFileType(file)
+      setFileType(resFileType)
+      console.log(fileType)
+      
       setFile(file)
-    }
+      if (resFileType.startsWith('image')) {
+        setMedia(<Image maxHeight="400px" objectFit='contain' width="100%" src={url}/>)
+      }else if (resFileType.startsWith('video')) {
+        setMedia(
+            <video key={url} width="100%" maxHeight="400px" controls autoPlay>
+                <source src={url} type={resFileType} />
+                Your browser does not support the video tag.
+            </video>
+        );
+    }else if (resFileType.startsWith('audio')) {
+        setMedia(
+            <audio controls>
+                <source src={url} type={resFileType} />
+                Your browser does not support the audio element.
+            </audio>
+        );
+    } else {
+        return <Text>Unsupported media type</Text>;
+    }}
+    
+    const getFileType = (file) => {
+        return file?.type || 'Unknown';
+    };
+
 
     const onSubmit = async (e) => {
         console.log(description)
-        const postId = await postPostToDb(account._id, description, file)
+        const postId = await postPostToDb(account._id, description, file, fileType)
         onClose(e)
     }
 
@@ -43,7 +71,8 @@ export default function CreatePostModal({ account, isOpen, onClose }) {
                           <FormControl>
                               <Textarea onChange={(e)=>{setDescription(e.target.value)}} placeholder='Say something...' />
                               <VStack m="10px" borderWidth="1px" borderColor="#E2E8F0">
-                                <Image maxHeight="400px" objectFit='contain' width="100%" src={fileUrl}/>
+                               {media}
+                                
                               </VStack>
                               <Text m="10px">Insert a media: </Text>
                               <Input onChange={(e) => {onFileChange(e)}} type="file"></Input>
