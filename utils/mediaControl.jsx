@@ -19,6 +19,13 @@ export const createLocalFileUrl = (event) => {
     return {file: selectedLocalFile, url};
 };
 
+export const getMediaUrlFromMediaId = async (imgId, notFoundPlaceholder) => {
+    
+    const mediaContent = await getMediaFromDb(imgId)
+    const mediaSrc = createUrlForMedia(mediaContent)
+    return mediaSrc ? mediaSrc : notFoundPlaceholder
+
+}
 
 /**
  * 
@@ -38,7 +45,7 @@ export const postMediaToDb = async (file, postId, mediaType) => {
         data.set('file', file);
         data.set('postId', postId);
         data.set('mediaType', mediaType)
-        const res = await fetch('http://localhost:3000/api/media', {
+        const res = await fetch('/api/media', {
             method: 'POST',
             body: data
         })

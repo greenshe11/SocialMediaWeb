@@ -54,6 +54,10 @@ export default function CreatePostModal({ account, isOpen, onClose }) {
         onClose(e)
     }
 
+    useEffect(()=>{
+        setMedia(null);
+    }, [isOpen, onClose])
+
     return (
         <Modal
             initialFocusRef={initialRef}

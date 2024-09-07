@@ -1,6 +1,6 @@
 "use client";
 
-import {VStack, Image, Box, Card, CardBody, CardHeader, chakra, FormControl, SlideFade, Text, useDisclosure, CardFooter, HStack, Divider} from '@chakra-ui/react';
+import {VStack, Image, Box, Card, CardBody, CardHeader, chakra, FormControl, SlideFade, Text, useDisclosure, CardFooter, HStack, Divider, Spacer} from '@chakra-ui/react';
 import {Link, Stack, Input, Button} from '@chakra-ui/react';
 import { useEffect, useState } from "react";
 import {useSession} from "next-auth/react";
@@ -45,12 +45,16 @@ export default function PostCard({account, postData, postMediaData}){
         if (!postMediaData) {
             return null;
         }
-    
+ 
+
         const mediaUrl = createUrlForMedia(postMediaData);
     
         // Check the media type using MIME type
         let mediaType = postMediaData?.media?.mediaType;
-    
+        if (!mediaType){
+            return null;
+        }
+        
         if (mediaType.startsWith('image')) {
             return <Image width="100%" maxHeight="400px" objectFit="contain" src={mediaUrl} />;
         } else if (mediaType.startsWith('video')) {
@@ -130,16 +134,18 @@ export default function PostCard({account, postData, postMediaData}){
     }
 
     const getPosterAccount = async () => {
-        const resPosterAccount = await getAccountInfo(postData.userId)
-        setPosterAccount(resPosterAccount.account)
-        return resPosterAccount.account
+        const resPosterAccount = await getAccountInfo(postData?.userId)
+        setPosterAccount(resPosterAccount?.account)
+        return resPosterAccount?.account
     }
 
     const getProfileImage = async (resPosterAccount) => {
-        const media = await getMediaFromDb(resPosterAccount.profileImg)
+        const media = await getMediaFromDb(resPosterAccount?.profileImg)
         setProfileImgUrl(createUrlForMedia(media))
     }
     const getInitialData = async() => {
+        console.log("POSTDATA",postData)
+        if (!postData){return}
         const resPosterAccount = await getPosterAccount()
         console.log("POSTERACCOUNT", resPosterAccount)
         getProfileImage(resPosterAccount)
@@ -177,7 +183,7 @@ export default function PostCard({account, postData, postMediaData}){
 
     // ---------------------------------
     return (
-        <VStack borderBottomWidth="2px" borderBottomColor="#E2E8F0" my="5px" py="5px" align='start'>
+        <VStack borderBottomWidth="2px" borderBottomColor="#E2E8F0" my="5px" py="5px" align='start' >
             
             {/*post Header */}
             <HStack>
@@ -189,8 +195,9 @@ export default function PostCard({account, postData, postMediaData}){
             </HStack>
 
             {/*post Body */}
-            <VStack width="100%" align="start">
+            <VStack width="100%" align="start" minH="140px">
                 <Text>{description}</Text>
+                <Spacer/>
                 <HStack width="100%" align="center" justifyContent="center" borderWidth="1px" borderColor="#E2E8F0" >
                     {media}
                 </HStack>

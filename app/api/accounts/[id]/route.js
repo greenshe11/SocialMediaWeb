@@ -19,7 +19,7 @@ export async function GET(request, {params}){
     const {id} = params;
     await connectMongoDB();
     // Get session information
-    const session = await getServerSession(authOptions);
+    /*const session = await getServerSession(authOptions);
 
     // Check if session exists
     if (!session) {
@@ -31,7 +31,7 @@ export async function GET(request, {params}){
     console.log(id)
     if (session?.id !== id) {
         return NextResponse.json({ message: 'Forbidden' }, { status: 403 });
-    }
+    }*/
 
     const account = await Account.findOne({_id: id});
     return NextResponse.json({account}, {status:200});

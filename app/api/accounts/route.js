@@ -17,3 +17,10 @@ export async function PUT(request,{params}){
     
     return NextResponse.json({message: "Topic updated"}, {status: 200});
 }*/
+
+export async function GET(request){
+    await connectMongoDB();
+
+    const content = await Account.find()
+    return NextResponse.json({content}, {status:200});
+}

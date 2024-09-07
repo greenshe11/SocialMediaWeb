@@ -11,24 +11,32 @@ import { useEffect, useState } from "react";
 import { getPostsFromDb } from "@/utils/postsControl";
 import { getMediaFromDb, getMediaFromDbUsingPost } from "@/utils/mediaControl";
 import { getAccountInfo } from "@/utils/accountControl";
+import { render } from "react-dom";
 
 export default function Home() {
   const sessionObj = useSession();
   const colorTheme = "#2E2F37";
-  const [posts, setPosts] = useState();
+  const [posts, setPosts] = useState([0,[]]); //iteration, posts
+  const [info, setInfo] = useState([undefined, undefined]); // account, allPosts
+
+  const getPosts = async () =>{
+    const index = info[1].length - 1- posts[0]
+    let postMediaData = await getMediaFromDbUsingPost(info[1][index]?._id)
+    
+    const tempJsx = posts[1]
+    console.log("RUNNNN")
+    if (!info[1][index]){return}
+    if (tempJsx.find(post => post.key == posts[0])){return}
+    
+    tempJsx.push(<PostCard key={posts[0]} account={info[0]} postData={info[1][index]} postMediaData={postMediaData}/>)
+    setPosts([posts[0]+1, tempJsx])
+  }
 
   useEffect(()=>{
     const fetchInfo = async () => {
-      const posts_jsx = []
       const account = await getAccountInfo(sessionObj.data?.id)
       const allPosts = await getPostsFromDb(sessionObj.data?.id)
-      for (let i=0 ; i<allPosts.length; i++){
-        let postMediaData = await getMediaFromDbUsingPost(allPosts[i]._id)
-        posts_jsx.push(<PostCard account={account} postData={allPosts[i]} postMediaData={postMediaData}/>)
-      }
-      setPosts(posts_jsx.reverse())
-
-        
+      setInfo([account, allPosts])  
     }
 
     if (sessionObj.status == "authenticated") {
@@ -38,6 +46,19 @@ export default function Home() {
     }
 }, [sessionObj.status]);
 
+   useEffect(()=>{
+    if (info[0]==undefined || info[1]==undefined){return}
+    getPosts()
+   }, [info]) // first run
+
+   useEffect(()=>{
+    console.log("INFO", info[0], info[1])
+    console.log("INFOPOSTS", posts[0], posts[1])
+    if (info[0]==undefined || info[1]==undefined){return}
+    if (info[1].length <= posts[0]){return}
+
+    getPosts()
+   },[posts]) // iterative run
   return (
   <ChakraProvider>
   <Flex>
@@ -46,15 +67,13 @@ export default function Home() {
        height="100%"
        w="100vw">
        <VStack>
-       <InfoCard sessionObj={sessionObj} colorTheme={colorTheme}/>
-       <Box h="10px" mb="10px" w={{base:"90%", md:"50%"}} ml = "20px" textAlign="left" >
-            <Text color="white">Posts</Text>
-        </Box> 
+       <InfoCard sessionObj={sessionObj} colorTheme={colorTheme} mode="post"/>
+       
         <Card
             w={{base:"90%", md:"50%"}}
             >
                 <CardBody textAlign="center">
-                  {posts}
+                  {posts[1]}
                 </CardBody>
         </Card>
        </VStack>
