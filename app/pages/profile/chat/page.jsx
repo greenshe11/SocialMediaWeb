@@ -42,7 +42,7 @@ export default function Home() {
     if (sessionObj.status == "authenticated") {
         console.log("AUTHENITICATED!")
         fetchInfo()
-        setInfoHead(<InfoCard sessionObj={sessionObj} infoId={sessionObj.data.id} colorTheme={colorTheme} mode="post"/>)
+        setInfoHead(<InfoCard sessionObj={sessionObj} infoId={sessionObj.data.id} colorTheme={colorTheme} mode="chat"/>)
 
     }
 }, [sessionObj.status]);
@@ -78,7 +78,7 @@ export default function Home() {
             w={{base:"90%", md:"50%"}}
             >
                 <CardBody textAlign="center">
-                  {posts[1]}
+                  
                 </CardBody>
         </Card>
        </VStack>

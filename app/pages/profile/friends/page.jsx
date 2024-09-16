@@ -15,10 +15,12 @@ import FriendCard from "@/components/friendCard";
 import { getFriendRequests, getFriends } from "@/utils/friendsControl";
 import { SequentialLoad, sequentialLoad } from "@/utils/behaviors";
 
+
 export default function FriendsList() {
   const sessionObj = useSession();
   const colorTheme = "#2E2F37";
   const [contentJ, setContentJ] = useState([])
+  const [infoHead, setInfoHead] = useState()
 
   const reloadFriendCards = () => {
     getFriendsCard()
@@ -71,7 +73,7 @@ export default function FriendsList() {
         console.log("AUTHENITICATED!")
         setContentJ(<Text textAlign="center" color={colorTheme}>Loading...</Text>)
         getFriendsCard()
-
+        setInfoHead(<InfoCard sessionObj={sessionObj} infoId={sessionObj.data.id} reloader={reloadFriendCards} colorTheme={colorTheme} mode="friendsList"/>)
       }
   }, [sessionObj.status]);
 
@@ -83,12 +85,13 @@ export default function FriendsList() {
        height="100%"
        w="100vw">
        <VStack>
-       <InfoCard sessionObj={sessionObj} reloader={reloadFriendCards} colorTheme={colorTheme} mode="friendsList"/>
        
+       {infoHead}
         <Card
             w={{base:"90%", md:"50%"}}
             >
               {contentJ}
+
              
         </Card>
        </VStack>

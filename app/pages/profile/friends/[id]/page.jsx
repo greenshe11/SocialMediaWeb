@@ -12,13 +12,16 @@ import { getPostsFromDb } from "@/utils/postsControl";
 import { getMediaFromDb, getMediaFromDbUsingPost } from "@/utils/mediaControl";
 import { getAccountInfo } from "@/utils/accountControl";
 import { render } from "react-dom";
+import { usePathname, useRouter } from "next/navigation";
 
 export default function Home() {
-  const sessionObj = useSession();
+  const url = usePathname()
+  const pattern = "(?<=/)[^/]+$"
+  const id = url.match(pattern)[0]
+  const sessionObj = useSession()
   const colorTheme = "#2E2F37";
   const [posts, setPosts] = useState([0,[]]); //iteration, posts
   const [info, setInfo] = useState([undefined, undefined]); // account, allPosts
-  const [infoHead, setInfoHead] = useState()
 
   const getPosts = async () =>{
     const index = info[1].length - 1- posts[0]
@@ -34,15 +37,14 @@ export default function Home() {
 
   useEffect(()=>{
     const fetchInfo = async () => {
-      const account = await getAccountInfo(sessionObj.data?.id)
-      const allPosts = await getPostsFromDb(sessionObj.data?.id)
+      const account = await getAccountInfo(id)
+      const allPosts = await getPostsFromDb(id)
       setInfo([account, allPosts])  
     }
 
     if (sessionObj.status == "authenticated") {
         console.log("AUTHENITICATED!")
         fetchInfo()
-        setInfoHead(<InfoCard sessionObj={sessionObj} infoId={sessionObj.data.id} colorTheme={colorTheme} mode="post"/>)
 
     }
 }, [sessionObj.status]);
@@ -55,14 +57,11 @@ export default function Home() {
    useEffect(()=>{
     console.log("INFO", info[0], info[1])
     console.log("INFOPOSTS", posts[0], posts[1])
-    console.log('sessionObj',sessionObj)
     if (info[0]==undefined || info[1]==undefined){return}
     if (info[1].length <= posts[0]){return}
-    
+
     getPosts()
    },[posts]) // iterative run
-
- 
   return (
   <ChakraProvider>
   <Flex>
@@ -71,10 +70,9 @@ export default function Home() {
        height="100%"
        w="100vw">
        <VStack>
-       {infoHead}
+       <InfoCard sessionObj={sessionObj} infoId={id} colorTheme={colorTheme} mode="visit"/>
        
         <Card
-
             w={{base:"90%", md:"50%"}}
             >
                 <CardBody textAlign="center">

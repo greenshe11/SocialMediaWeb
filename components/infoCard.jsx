@@ -16,7 +16,7 @@ import { createUrlForMedia, getMediaFromDb } from '@/utils/mediaControl';
 import CreatePostModal from './createPostModal';
 import AddFriendModal from './addFriendModal';
 
-export default function InfoCard({sessionObj, colorTheme, mode, reloader}){
+export default function InfoCard({sessionObj, infoId, colorTheme, mode, reloader}){
     const router = useRouter();
     const { isOpen, onOpen, onClose } = useDisclosure();
     const { isOpen: postIsOpen, onOpen: postOnOpen, onClose: postOnClose} = useDisclosure();
@@ -31,7 +31,7 @@ export default function InfoCard({sessionObj, colorTheme, mode, reloader}){
     const [address, setAddress] = useState(); //string
     const [birthdate, setBirthdate] = useState(); //date
     const [profileImg, setProfileImg] = useState(); //string id
-   
+    
     // processed
     const [displayImage, setDisplayImage] = useState(); // string (url)
 
@@ -41,7 +41,8 @@ export default function InfoCard({sessionObj, colorTheme, mode, reloader}){
     useEffect(()=>{
         async function fetchInfo() {
            
-            const accountInfo = await getAccountInfo(session?.id)
+            console.log("profileId",infoId)
+            const accountInfo = await getAccountInfo(infoId)
             setAccount(accountInfo.account)
         }
 
@@ -51,6 +52,18 @@ export default function InfoCard({sessionObj, colorTheme, mode, reloader}){
     }, [status]);
 
     // ---------------------------
+    function makeButtonsByMode(){
+        if (mode == "friendsList"){
+            setButtonsByMode(<Button px="10px" textColor="white" backgroundColor="rgb(100,190,100)" sx={{_hover: {backgroundColor:"rgba(50,180,50)"}}} onClick={(e)=>{addFriendOnOpen(e)}}>Add Friend</Button>)
+        }else if (mode=="post"){
+            setButtonsByMode(<Button px="10px" textColor="white" backgroundColor="rgb(100,190,100)" sx={{_hover: {backgroundColor:"rgba(50,180,50)"}}} onClick={(e)=>{postOnOpen(e)}}>Post Something</Button>)
+        }else if (mode=="visit"){
+            setButtonsByMode(<></>)
+        }else if (mode='chat'){
+            setButtonsByMode(<></>)
+        }
+    }
+
     useEffect(()=>{
        
         async function createInitialData() {
@@ -61,13 +74,7 @@ export default function InfoCard({sessionObj, colorTheme, mode, reloader}){
             setProfileImg(account.profileImg)
         }
   
-        function makeButtonsByMode(){
-            if (mode == "friendsList"){
-                setButtonsByMode(<Button px="10px" textColor="white" backgroundColor="rgb(100,190,100)" sx={{_hover: {backgroundColor:"rgba(50,180,50)"}}} onClick={(e)=>{addFriendOnOpen(e)}}>Add Friend</Button>)
-            }else if (mode=="post"){
-                setButtonsByMode(<Button px="10px" textColor="white" backgroundColor="rgb(100,190,100)" sx={{_hover: {backgroundColor:"rgba(50,180,50)"}}} onClick={(e)=>{postOnOpen(e)}}>Post Something</Button>)
-            }
-        }
+        
 
     
         if (!account) {return}
@@ -85,6 +92,8 @@ export default function InfoCard({sessionObj, colorTheme, mode, reloader}){
 
         profileImg ? getProfileImage() : setDisplayImage( "/p-default.png")
     }, [profileImg])
+
+  
 
     // ---------------------------------
     return (
@@ -114,18 +123,33 @@ export default function InfoCard({sessionObj, colorTheme, mode, reloader}){
                     <Text fontSize="10px" color={colorTheme} fontWeight={mode=="post"? "bold":""}>
                         <Link onClick={(e)=>{router.push('/pages/profile')}}>Posts</Link>
                     </Text>
-                    <Text mx="20px" fontSize="10px">|</Text>
-                    <Text fontSize="10px" color={colorTheme}>
-                        <Link onClick={(e)=>{onOpen(e)}}>Edit Profile</Link>
-                    </Text>
+                    {mode!='visit'?
+                    <>
+                        <Text mx="20px" fontSize="10px">|</Text>
+                            <Text fontSize="10px" color={colorTheme}>
+                                <Link onClick={(e)=>{router.push('/pages/profile/chat')}}>Chat</Link>
+                        </Text>
+
+                        <Text mx="20px" fontSize="10px">|</Text>
+                        <Text fontSize="10px" color={colorTheme}>
+                            <Link onClick={(e)=>{onOpen(e)}}>Edit Profile</Link>
+                        </Text>
+
+                        
+
+
+                    </>:null}
+                   
                     <Text mx="20px" fontSize="10px">|</Text>
                     <Text fontSize="10px" color="red">
-                        <Link textAlign="start" onClick={(e)=>{signOut()}}>Logout</Link>
-                </Text>
+                    {mode!='visit'?
+                        <Link textAlign="start" onClick={(e)=>{signOut()}}>Logout</Link>:
+                        <Link textAlign="start" onClick={(e)=>{router.back()}}>Return</Link>}
+                    </Text>
                 </CardFooter>
             </Card>
-            <HStack h="50px" w={{base:"90%", md:"50%"}} ml = "20px" textAlign="left">
-                {buttonsByMode}
+            <HStack h={mode!='chat'?"50px":"10px"} w={{base:"90%", md:"50%"}} ml = "20px" textAlign={mode!='visit'?'left':'center'}>
+                {mode!='visit'?buttonsByMode:<Text color='white'>You are visiting someone's profile</Text>}
             </HStack>
             <InfoEditModal account={account} isOpen={isOpen} onOpen={onOpen} onClose={onClose}></InfoEditModal>
             <CreatePostModal account={account} isOpen={postIsOpen} onOpen={postOnOpen} onClose={postOnClose}></CreatePostModal>

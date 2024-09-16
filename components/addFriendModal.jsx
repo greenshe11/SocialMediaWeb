@@ -10,6 +10,7 @@ import { editAccount, getAccountInfo, getAllAccounts } from '@/utils/accountCont
 import { addFriend, cancelFriendRequest, confirmFriendRequest, getFriendRequests, getFriends, getTakenFriendRequest } from '@/utils/friendsControl';
 
 export default function AddFriendModal({account, isOpen, onOpen, onClose, reloader}){
+    const router = useRouter();
     // FIELDS/USERDATA
     const [suggestedFriends, setSuggestedFriends] = useState();
     // FIELDS/IMAGE
@@ -57,7 +58,7 @@ export default function AddFriendModal({account, isOpen, onOpen, onClose, reload
 
         tempSuggestions.push(<Card p="10px" w="100%"><HStack>
           <Image width="50px" height="50px" objectFit="cover" mx="10px" borderWidth="5px" borderStyle="solid" borderRadius="50%" src={profileImg}></Image>
-          <Text fontSize="15px" fontWeight="bold"><Link>{targetAccount?.account.username}</Link></Text>
+          <Text fontSize="15px" fontWeight="bold"><Link onClick={(e)=>{router.push(`/pages/profile/friends/${targetAccount?.account._id}`)}}>{targetAccount?.account.username}</Link></Text>
           <Spacer/>
           <Button px="10px" textColor="white" backgroundColor="rgb(100, 190,100)" onClick={(e)=>{onClickConfirmRequest(e, account._id, targetAccount.account._id); hideButton(e)}} sx={{_hover: {backgroundColor:"rgb(50,180,50)", color: "white"}}}>Confirm</Button>
         </HStack></Card>)
@@ -71,7 +72,7 @@ export default function AddFriendModal({account, isOpen, onOpen, onClose, reload
         
         tempSuggestions.push(<Card p="10px" w="100%"><HStack>
                   <Image width="50px" height="50px" objectFit="cover" mx="10px" borderWidth="5px" borderStyle="solid" borderRadius="50%" src={profileImg}></Image>
-                  <Text fontSize="15px" fontWeight="bold"><Link>{allAccount.content[i].username}</Link></Text>
+                  <Text fontSize="15px" fontWeight="bold"><Link onClick={(e)=>{router.push(`/pages/profile/friends/${allAccount.content[i]._id}`)}}>{allAccount.content[i].username}</Link></Text>
                   <Spacer/>
                   <Button id={`${allAccount.content[i]._id}-cancel`} px="10px" display="none" textColor="white" backgroundColor="rgb(190,100, 100)" onClick={(e)=>{onClickCancelFriendRequest(e, account._id, allAccount.content[i]._id); hideButton(e)}} sx={{_hover: {backgroundColor:"rgb(180,50,50)", color: "white"}}}>Cancel Request</Button>
                   <Button id={`${allAccount.content[i]._id}-request`} data-userid={allAccount.content[i]._id} px="10px" textColor="white" backgroundColor="rgb(100, 190,100)" onClick={(e)=>{requestFriend(e, account._id); hideButton(e)}} sx={{_hover: {backgroundColor:"rgb(50,180,50)", color: "white"}}}>Add Friend</Button>

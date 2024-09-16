@@ -19,6 +19,7 @@ import { createUrlForMedia, getMediaFromDb } from '@/utils/mediaControl';
 import { createReaction, updateReaction, deleteReaction, getReactionsFromPost, getUserReactionFromPost } from '@/utils/reactionControl';
 
 export default function PostCard({account, postData, postMediaData}){
+    const {status, data:session} = useSession();
     const [posterAccount, setPosterAccount] = useState();
     const [loveLabel, setLoveLabel] = useState();
     const [laughLabel, setLaughLabel] = useState();
@@ -112,7 +113,8 @@ export default function PostCard({account, postData, postMediaData}){
             }else if( reactionData.content[i].reaction == "laugh"){
                 tempLaughCount += 1;
             }
-            if (reactionData.content[i].reactorId==account.account._id){
+            console.log("REACTORID", reactionData.content[i].reactorId)
+            if (reactionData.content[i].reactorId==session.id){
                 resetColor()
                 showReactionsColors( reactionData.content[i].reaction)
             }
@@ -157,19 +159,20 @@ export default function PostCard({account, postData, postMediaData}){
     }
 
     const makeReaction = async (e, reaction) => {
-        const currentReaction = await getUserReactionFromPost(postData._id, account.account._id)
+        console.log("SESSION",session)
+        let currentReaction = await getUserReactionFromPost(postData._id, session.id)
         console.log(currentReaction)
         if (!currentReaction.content){
             console.log('creating reaction')
-            await createReaction(postData._id, account.account._id, posterAccount._id, reaction)
+            await createReaction(postData._id, session.id, posterAccount._id, reaction)
         }else if (currentReaction.content.reaction == reaction) {
             console.log('deleting reaction')
-            await deleteReaction(postData._id, account.account._id)
+            await deleteReaction(postData._id, session.id)
             resetColor()
         }
         else{
             console.log('updating reaction')
-            await updateReaction(postData._id, account.account._id, reaction)
+            await updateReaction(postData._id, session.id, reaction)
         }
         showReactions()
         
@@ -178,8 +181,10 @@ export default function PostCard({account, postData, postMediaData}){
     // -----------------------------------
     
     useEffect(()=>{
+        if (status=='authenticated'){
         getInitialData()
-    },[])
+        }
+    },[status])
 
     // ---------------------------------
     return (

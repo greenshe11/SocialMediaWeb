@@ -21,6 +21,7 @@ import { sequentialLoad } from '@/utils/behaviors';
 import { cancelFriendRequest } from '@/utils/friendsControl';
 
 export default function FriendCard({account, targetAccount, state, refresherFunc, profileImageUrl}){
+    const router = useRouter();
     const [btnUnfriendDisplay, setBtnUnfriendDisplay] = useState("none");
     const [btnCancelDisplay, setBtnCancelDisplay] = useState("none");
     const [profileImage, setProfileImage] = useState("/p-default.png");
@@ -54,9 +55,8 @@ export default function FriendCard({account, targetAccount, state, refresherFunc
         <Card p="10px" w="100%">
         <HStack>
             <Image width="50px" height="50px" objectFit="cover" mx="10px" borderWidth="5px" borderStyle="solid" borderRadius="50%" src={profileImageUrl }></Image>
-            <Text fontSize="15px" fontWeight="bold"><Link>{targetAccount.username}</Link></Text>
+            <Text fontSize="15px" fontWeight="bold"><Link onClick={(e)=>{router.push(`/pages/profile/friends/${targetAccount._id}`)}}>{targetAccount.username}</Link></Text>
             <Spacer/>
-            
             <Button px="10px" textColor="white" onClick={(e)=>{onClickCancelFriendRequest(e)}} display={btnCancelDisplay} backgroundColor="rgb(190,100,100)" sx={{_hover: {backgroundColor:"rgb(180,50,50)", color: "white"}}}>Cancel Request</Button>
             <Button px="10px" textColor="white" onClick={(e)=>{onClickCancelFriendRequest(e)}} display={btnUnfriendDisplay} backgroundColor="rgb(190,100,100)" sx={{_hover: {backgroundColor:"rgb(180,50,50)", color: "white"}}}>Unfriend</Button>
             
