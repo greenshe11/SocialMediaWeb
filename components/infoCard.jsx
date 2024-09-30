@@ -126,7 +126,7 @@ export default function InfoCard({sessionObj, infoId, colorTheme, mode, reloader
                     {mode!='visit'?
                     <>
                         <Text mx="20px" fontSize="10px">|</Text>
-                            <Text fontSize="10px" color={colorTheme}>
+                            <Text fontSize="10px" color={colorTheme} fontWeight={mode=="chat"? "bold" : ""}>
                                 <Link onClick={(e)=>{router.push('/pages/profile/chat')}}>Chat</Link>
                         </Text>
 
@@ -148,9 +148,10 @@ export default function InfoCard({sessionObj, infoId, colorTheme, mode, reloader
                     </Text>
                 </CardFooter>
             </Card>
-            <HStack h={mode!='chat'?"50px":"10px"} w={{base:"90%", md:"50%"}} ml = "20px" textAlign={mode!='visit'?'left':'center'}>
+            <HStack h={mode!='chat'?"50px":"0px"} w={{base:"90%", md:"50%"}} ml = "20px" textAlign={mode!='visit'?'left':'center'}>
                 {mode!='visit'?buttonsByMode:<Text color='white'>You are visiting someone's profile</Text>}
             </HStack>
+
             <InfoEditModal account={account} isOpen={isOpen} onOpen={onOpen} onClose={onClose}></InfoEditModal>
             <CreatePostModal account={account} isOpen={postIsOpen} onOpen={postOnOpen} onClose={postOnClose}></CreatePostModal>
             <AddFriendModal account={account} isOpen={addFriendIsOpen} onOpen={addFriendOnOpen} onClose={addFriendOnClose} reloader={reloader}></AddFriendModal>

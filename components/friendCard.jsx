@@ -37,6 +37,7 @@ export default function FriendCard({account, targetAccount, state, refresherFunc
         console.log("FRIEND REQUEST CANCELLED")
         refresherFunc()
     }
+        
     useEffect(()=>{
         if (state=="confirmed"){
             setBtnCancelDisplay("none")

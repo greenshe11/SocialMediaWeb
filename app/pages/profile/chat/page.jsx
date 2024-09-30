@@ -1,7 +1,7 @@
 "use client";
 
 import InfoCard from "@/components/infoCard";
-import { Flex,Text, Box, CardHeader, CardFooter, Card, Image, CardBody, VStack} from '@chakra-ui/react';
+import { Flex,Text, Box, CardHeader, CardFooter, Card, Image, CardBody, VStack, HStack, useDisclosure, Button} from '@chakra-ui/react';
 import InfoEditModal from "@/components/infoEditModal";
 import { ChakraProvider } from '@chakra-ui/react'
 import FileUpload from "@/components/fileUpload";
@@ -9,81 +9,98 @@ import { signOut, useSession } from "next-auth/react"
 import PostCard from "@/components/postCard";
 import { useEffect, useState } from "react";
 import { getPostsFromDb } from "@/utils/postsControl";
-import { getMediaFromDb, getMediaFromDbUsingPost } from "@/utils/mediaControl";
+import { getMediaFromDb, getMediaFromDbUsingPost, getMediaUrlFromMediaId } from "@/utils/mediaControl";
 import { getAccountInfo } from "@/utils/accountControl";
 import { render } from "react-dom";
+import { UserScroll } from "@/components/chat/userScroll";
+import { MessageUser } from "@/components/chat/messageUser";
+import ChatBox from "@/components/chat/chatBox";
+import io from 'socket.io-client';
+import AddMessageModal from "@/components/chat/addMessageModal";
+import { getFriends } from "@/utils/friendsControl";
 
 export default function Home() {
   const sessionObj = useSession();
-  const colorTheme = "#2E2F37";
-  const [posts, setPosts] = useState([0,[]]); //iteration, posts
-  const [info, setInfo] = useState([undefined, undefined]); // account, allPosts
-  const [infoHead, setInfoHead] = useState()
+  const account = useSession();
+  const {data: session} = useSession();
 
-  const getPosts = async () =>{
-    const index = info[1].length - 1- posts[0]
-    let postMediaData = await getMediaFromDbUsingPost(info[1][index]?._id)
-    
-    const tempJsx = posts[1]
-    if (!info[1][index]){return}
-    if (tempJsx.find(post => post.key == posts[0])){return}
-    
-    tempJsx.push(<PostCard key={posts[0]} account={info[0]} postData={info[1][index]} postMediaData={postMediaData}/>)
-    setPosts([posts[0]+1, tempJsx])
+  const colorTheme = "#2E2F37";
+  const { isOpen: isOpenChat, onOpen: onOpenChat, onClose:onCloseChat } = useDisclosure();
+  const [infoHead, setInfoHead] = useState()
+  const [selectedRoom, setSelectedRoom] = useState();
+  const [rooms, setRooms] = useState()
+
+  const getFriendsFunc = async () => {
+    // get all friends
+    const friendsAll = await getFriends(session?.id, 'confirmed' )
+    const tempRes = []
+    for (let i=0; i<friendsAll.content.length; i++){
+      const user = friendsAll.content[i]
+      const userImage = await getMediaUrlFromMediaId(user.profileImg)
+      tempRes.push({targetUserImage: })
+    }
+    return []
+    //return  [{targetUserImage:null; targetUsername:null; userId:null; targetUserId: null}, ...]
   }
+
+  const addRoomFunc = () => {
+    console.log("add room function")
+  }
+
+  const onSelectRoom = () => {
+    // get all rooms
+  }
+  /**
+   * opens
+   * get rooms that the user is in
+   * shows all friends
+   * exists = if room exists
+   * if exists
+   *    show all messages in room
+   * if chats:
+   *    if ! exists
+   *      add chat to room
+   *      add message to room
+   *    else:
+   *       add chat to room
+   *  
+   */
+    
+  
 
   useEffect(()=>{
     const fetchInfo = async () => {
       const account = await getAccountInfo(sessionObj.data?.id)
       const allPosts = await getPostsFromDb(sessionObj.data?.id)
-      setInfo([account, allPosts])  
     }
 
     if (sessionObj.status == "authenticated") {
         console.log("AUTHENITICATED!")
         fetchInfo()
         setInfoHead(<InfoCard sessionObj={sessionObj} infoId={sessionObj.data.id} colorTheme={colorTheme} mode="chat"/>)
-
     }
+  
 }, [sessionObj.status]);
-
-   useEffect(()=>{
-    if (info[0]==undefined || info[1]==undefined){return}
-    getPosts()
-   }, [info]) // first run
-
-   useEffect(()=>{
-    console.log("INFO", info[0], info[1])
-    console.log("INFOPOSTS", posts[0], posts[1])
-    console.log('sessionObj',sessionObj)
-    if (info[0]==undefined || info[1]==undefined){return}
-    if (info[1].length <= posts[0]){return}
-    
-    getPosts()
-   },[posts]) // iterative run
 
  
   return (
   <ChakraProvider>
-  <Flex>
-       <Box
-       bg={colorTheme}
-       height="100%"
-       w="100vw">
-       <VStack>
-       {infoHead}
-       
-        <Card
-
-            w={{base:"90%", md:"50%"}}
-            >
-                <CardBody textAlign="center">
-                  
-                </CardBody>
-        </Card>
-       </VStack>
+    <Flex>
+      <Box
+      bg={colorTheme}
+      height="100%"
+      w="100vw">
+      <VStack>
+        {infoHead}
+        
+        <HStack h={"50px"} w={{base:"90%", md:"50%"}} ml = "20px" textAlign='left'>
+        <Button px="10px" textColor="white" backgroundColor="rgb(100,190,100)" sx={{_hover: {backgroundColor:"rgba(50,180,50)"}}} onClick={(e)=>{onOpenChat(e)}}>Add New Message</Button>
+          </HStack>
+        <ChatBox colorTheme={colorTheme}/>
+      </VStack>
       </Box>
-      </Flex>
+    </Flex>
+    <AddMessageModal addRoomFunc={addRoomFunc} getFriendsFunc={getFriendsFunc} isOpen={isOpenChat} onClose={onCloseChat} onOpen={onOpenChat}></AddMessageModal>
   </ChakraProvider>
      
   );

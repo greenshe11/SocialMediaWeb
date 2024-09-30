@@ -4,6 +4,8 @@ import bcrypt from 'bcryptjs';
 import connectMongoDB from "@/app/libs/mongodb";
 import Account from "@/app/models/accounts";
 
+console.log("CREDENTIALS PROVIDER",CredentialsProvider)
+
 export const authOptions = {
     providers: [
         CredentialsProvider({
@@ -25,6 +27,7 @@ export const authOptions = {
                     }
                     return user;
                 } catch(error){
+                    console.log("SSS")
                     console.log("Error",error);
                 }
               

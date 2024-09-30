@@ -12,6 +12,7 @@ export async function POST(request){
     if (!file){
         return NextResponse.json({success: false});
     }
+    
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
     await connectMongoDB();
