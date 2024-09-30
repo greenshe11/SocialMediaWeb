@@ -37,7 +37,7 @@ export default function Home() {
     for (let i=0; i<friendsAll.content.length; i++){
       const user = friendsAll.content[i]
       const userImage = await getMediaUrlFromMediaId(user.profileImg)
-      tempRes.push({targetUserImage: })
+      //tempRes.push({targetUserImage: })
     }
     return []
     //return  [{targetUserImage:null; targetUsername:null; userId:null; targetUserId: null}, ...]
