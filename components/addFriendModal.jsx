@@ -8,6 +8,7 @@ import {createLocalFileUrl, createUrlForMedia, editMedia, getMediaFromDb, getMed
 import { useRouter } from "next/navigation";
 import { editAccount, getAccountInfo, getAllAccounts } from '@/utils/accountControl';
 import { addFriend, cancelFriendRequest, confirmFriendRequest, getFriendRequests, getFriends, getTakenFriendRequest } from '@/utils/friendsControl';
+import { addUsersToRoom, createRoom } from '@/utils/roomControl';
 
 export default function AddFriendModal({account, isOpen, onOpen, onClose, reloader}){
     const router = useRouter();
@@ -38,11 +39,12 @@ export default function AddFriendModal({account, isOpen, onOpen, onClose, reload
    const onClickConfirmRequest = async (e, targetUserId, sourceUserId) => {
       e.preventDefault();
       await confirmFriendRequest(sourceUserId, targetUserId, {state: "confirmed"})
+      const room = await createRoom()
+      await addUsersToRoom([targetUserId, sourceUserId], room._id)
       console.log("FRIEND REQUEST CONFIRMED")
       reloader()
    }
-   
-
+  
    useEffect(()=>{
     async function getSuggestedFriends(){
       const allAccount = await getAllAccounts()
@@ -79,6 +81,7 @@ export default function AddFriendModal({account, isOpen, onOpen, onClose, reload
                 </HStack></Card>)
         }
       }
+      
       console.log("FRIEND SUGGESTIONS", tempSuggestions)
       setSuggestedFriends(tempSuggestions)
     }

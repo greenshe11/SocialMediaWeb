@@ -8,6 +8,7 @@ const accountSchema = new Schema(
         profileImg: String,
         address: String,
         birthdate: Date,
+        
     },{
      timestamps: true
      

@@ -23,7 +23,8 @@ export default function AddMessageModal({getFriendsFunc, addRoomFunc, isOpen, on
           const userId = user.userId
           const targetUsername = user.targetUserName
           const targetUserId = user.targetUserId
-          tempFriends.push(<Card p="10px" w="100%"><HStack>
+          tempFriends.push(<Card p="10px" w="100%">
+          <HStack>
             <Image width="50px" height="50px" objectFit="cover" mx="10px" borderWidth="5px" borderStyle="solid" borderRadius="50%" src={image}></Image>
             <Text fontSize="15px" fontWeight="bold"><Link onClick={(e)=>{router.push(`/pages/profile/friends/${targetUserId}`)}}>{targetUsername}</Link></Text>
             <Spacer/>

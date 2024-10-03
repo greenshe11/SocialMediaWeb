@@ -2,7 +2,7 @@ import mongoose, {Schema} from "mongoose";
 
 const roomSchema = new Schema(
     {
-        userId: String
+    //room creator
     },{
         timestamps: true
     }    
